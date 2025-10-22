@@ -1,5 +1,5 @@
 // MenuList component - displays menu items organized by course in a SectionList
-import React from 'react';
+import React from 'react'; 
 import {
   View,
   Text,
@@ -38,9 +38,10 @@ export function MenuList({ onEdit, onDelete }: MenuListProps) {
   };
 
   return (
+    // Inside MenuList, wherever you render the FlatList or SectionList
     <SectionList
       sections={getSectionData()}
-      scrollEnabled={false}
+      nestedScrollEnabled  // <--- add this here
       keyExtractor={(item) => item.id}
       renderSectionHeader={({ section: { title } }) => (
         <Text style={styles.sectionHeader}>{title}</Text>
@@ -53,7 +54,6 @@ export function MenuList({ onEdit, onDelete }: MenuListProps) {
             <Text style={styles.price}>R{item.price.toFixed(2)}</Text>
           </View>
 
-          {/* Only show action buttons for chef */}
           {userRole === 'chef' && (onEdit || onDelete) && (
             <View style={styles.actions}>
               {onEdit && (
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 6,
     alignItems: 'center',
-    marginRight: 8, 
+    marginRight: 8,
   },
   editButtonText: {
     color: '#ffffff',

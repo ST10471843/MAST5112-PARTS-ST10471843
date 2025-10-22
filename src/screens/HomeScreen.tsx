@@ -34,33 +34,25 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     userRole,
   } = useMenu();
 
-  // Navigation state
   const [activeTab, setActiveTab] = useState<NavigationTab>('home');
-
-  // Form state
   const [dishName, setDishName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [price, setPrice] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Calculate average price for each course
   const getAveragePriceByCourse = (courseName: string): number => {
     const courseItems = getMenuItemsByCourse(courseName);
     if (courseItems.length === 0) return 0;
 
     let total = 0;
-    // Use for loop as specified
     for (let i = 0; i < courseItems.length; i++) {
-      total = total + courseItems[i].price;
+      total += courseItems[i].price;
     }
     return total / courseItems.length;
   };
 
-  // Validate form
   const validateForm = (): boolean => {
     if (dishName.trim() === '') {
       Alert.alert('Error', 'Please enter a dish name');
@@ -81,7 +73,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     return true;
   };
 
-  // Handle save
   const handleSave = () => {
     if (!validateForm()) return;
 
@@ -103,7 +94,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     handleClear();
   };
 
-  // Handle clear
   const handleClear = () => {
     setDishName('');
     setDescription('');
@@ -112,7 +102,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     setEditingId(null);
   };
 
-  // Handle edit
   const handleEdit = (id: string) => {
     const item = menuItems.find((item) => item.id === id);
     if (item) {
@@ -125,7 +114,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     }
   };
 
-  // Handle delete
   const handleDelete = (id: string) => {
     Alert.alert(
       'Confirm Delete',
@@ -146,14 +134,12 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     );
   };
 
-  // Render course item for horizontal FlatList (not functional yet)
   const renderCourseItem = ({ item }: { item: typeof CourseList[0] }) => (
     <TouchableOpacity style={styles.courseChip} activeOpacity={0.7}>
       <Text style={styles.courseChipText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
-  // Filter items for search
   const filteredItems = searchQuery ? searchMenuItems(searchQuery) : menuItems;
 
   return (
@@ -168,10 +154,9 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
 
       {/* Main Content with ScrollView */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* HOME TAB - Top Half: Prepared Menu View */}
+        {/* HOME TAB */}
         {activeTab === 'home' && (
           <View style={styles.homeSection}>
-            {/* Course Price Summary */}
             <View style={styles.summaryContainer}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Avg price of</Text>
@@ -196,7 +181,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               </View>
             </View>
 
-            {/* Horizontal Course List (not functional yet) */}
+            {/* Horizontal Course List */}
             <FlatList
               data={CourseList}
               renderItem={renderCourseItem}
@@ -208,20 +193,13 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
 
             <Text style={styles.menuTitle}>Prepared Menu</Text>
 
-            {/* Menu Display - SectionList via MenuList component */}
+            {/* MenuList with nestedScrollEnabled to fix the warning */}
             {menuItems.length > 0 ? (
-              <>
-                <MenuList
-                  onEdit={userRole === 'chef' ? handleEdit : undefined}
-                  onDelete={userRole === 'chef' ? handleDelete : undefined}
-                />
-
-                {/* Total Items Count with underline effect */}
-                <View style={styles.totalContainer}>
-                  <Text style={styles.totalText}>Total Items: {menuItems.length}</Text>
-                  <View style={styles.underline} />
-                </View>
-              </>
+              <MenuList
+                onEdit={userRole === 'chef' ? handleEdit : undefined}
+                onDelete={userRole === 'chef' ? handleDelete : undefined}
+                nestedScrollEnabled
+              />
             ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>
@@ -235,12 +213,11 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
           </View>
         )}
 
-        {/* EDIT TAB - Bottom Half: Menu Management (Chef only) */}
+        {/* EDIT TAB */}
         {activeTab === 'edit' && userRole === 'chef' && (
           <View style={styles.managementSection}>
             <Text style={styles.sectionTitle}>Menu Management</Text>
 
-            {/* Title Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Dish Name</Text>
               <TextInput
@@ -252,7 +229,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               />
             </View>
 
-            {/* Description Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Description</Text>
               <TextInput
@@ -267,7 +243,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               />
             </View>
 
-            {/* Course Picker */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Course</Text>
               <View style={styles.pickerContainer}>
@@ -278,17 +253,12 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                 >
                   <Picker.Item label="Select a course" value="" />
                   {CourseList.map((course) => (
-                    <Picker.Item
-                      key={course.id}
-                      label={course.name}
-                      value={course.name}
-                    />
+                    <Picker.Item key={course.id} label={course.name} value={course.name} />
                   ))}
                 </Picker>
               </View>
             </View>
 
-            {/* Price Input - Numeric Keyboard */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Price (R)</Text>
               <TextInput
@@ -301,7 +271,6 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               />
             </View>
 
-            {/* Action Buttons */}
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
@@ -330,12 +299,10 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
           </View>
         )}
 
-        {/* MENU TAB - Search and Browse */}
+        {/* MENU TAB */}
         {activeTab === 'menu' && (
           <View style={styles.menuSection}>
             <Text style={styles.sectionTitle}>Browse Menu</Text>
-
-            {/* Search Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Search</Text>
               <TextInput
@@ -347,8 +314,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               />
             </View>
 
-            {/* Search Results */}
-            {searchQuery !== '' && (
+            {searchQuery !== '' ? (
               <View style={styles.searchResults}>
                 <Text style={styles.searchResultsTitle}>
                   Results ({filteredItems.length})
@@ -363,17 +329,14 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                   </View>
                 ))}
               </View>
-            )}
-
-            {/* Full Menu Display */}
-            {searchQuery === '' && (
+            ) : (
               <>
                 <Text style={styles.menuTitle}>Full Menu</Text>
-                <MenuList />
+                <MenuList nestedScrollEnabled />
               </>
             )}
           </View>
-        )}
+        ))}
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -386,6 +349,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
   );
 }
 
+// --- Styles remain exactly the same as before ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -475,22 +439,6 @@ const styles = StyleSheet.create({
     color: '#000000',
     textAlign: 'center',
     marginVertical: 16,
-  },
-  totalContainer: {
-    marginTop: 16,
-    paddingTop: 16,
-    alignItems: 'center',
-  },
-  totalText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 4,
-  },
-  underline: {
-    width: 150,
-    height: 1,
-    backgroundColor: '#000000',
   },
   emptyContainer: {
     paddingVertical: 40,
