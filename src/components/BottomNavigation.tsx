@@ -1,6 +1,6 @@
-// Bottom Navigation Bar with basic icons (no SVG)
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 type NavigationItem = 'home' | 'edit' | 'menu';
 
@@ -10,23 +10,43 @@ type BottomNavigationProps = {
   userRole: 'chef' | 'client' | null;
 };
 
-// Simple Icon Component using emojis or text
-function Icon({ name, color }: { name: NavigationItem; color: string }) {
-  let icon = '';
+export function HomeIcon({ color }: { color: string }) {
+  return (
+    <Svg width={30} height={24} viewBox="0 0 30 24" fill="none">
+      <Path
+        d="M5 10L15 2L25 10V22H19V15H11V22H5V10Z"
+        stroke={color}
+        strokeWidth={2}
+        fill="none"
+      />
+    </Svg>
+  );
+}
 
-  switch (name) {
-    case 'home':
-      icon = '🏠';
-      break;
-    case 'edit':
-      icon = '✏️';
-      break;
-    case 'menu':
-      icon = '📋';
-      break;
-  }
+// Edit Icon Component
+export function EditIcon({ color }: { color: string }) {
+  return (
+    <Svg width={30} height={24} viewBox="0 0 30 24" fill="none">
+      <Path
+        d="M6.25 19H8.03125L20.25 9.225L18.4688 7.8L6.25 17.575V19ZM3.75 21V16.75L20.25 3.575C20.5 3.39167 20.776 3.25 21.0781 3.15C21.3802 3.05 21.6979 3 22.0312 3C22.3646 3 22.6875 3.05 23 3.15C23.3125 3.25 23.5833 3.4 23.8125 3.6L25.5313 5C25.7813 5.18333 25.9635 5.4 26.0781 5.65C26.1927 5.9 26.25 6.15 26.25 6.4C26.25 6.66667 26.1927 6.92083 26.0781 7.1625C25.9635 7.40417 25.7813 7.625 25.5313 7.825L9.0625 21H3.75ZM19.3438 8.525L18.4688 7.8L20.25 9.225L19.3438 8.525Z"
+        fill={color}
+      />
+    </Svg>
+  );
+}
 
-  return <Text style={{ fontSize: 24, color }}>{icon}</Text>;
+// Menu Icon Component
+export function MenuIcon({ color }: { color: string }) {
+  return (
+    <Svg width={30} height={24} viewBox="0 0 30 24" fill="none">
+      <Path
+        d="M3 6H27M3 12H27M3 18H27"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
 }
 
 export function BottomNavigation({ activeTab, onTabChange, userRole }: BottomNavigationProps) {
@@ -41,7 +61,7 @@ export function BottomNavigation({ activeTab, onTabChange, userRole }: BottomNav
         onPress={() => onTabChange('home')}
         activeOpacity={0.7}
       >
-        <Icon name="home" color={activeTab === 'home' ? activeColor : inactiveColor} />
+        <HomeIcon color={activeTab === 'home' ? activeColor : inactiveColor} />
         <Text style={[styles.label, activeTab === 'home' && styles.activeLabel]}>
           Home
         </Text>
@@ -54,7 +74,7 @@ export function BottomNavigation({ activeTab, onTabChange, userRole }: BottomNav
           onPress={() => onTabChange('edit')}
           activeOpacity={0.7}
         >
-          <Icon name="edit" color={activeTab === 'edit' ? activeColor : inactiveColor} />
+          <EditIcon color={activeTab === 'edit' ? activeColor : inactiveColor} />
           <Text style={[styles.label, activeTab === 'edit' && styles.activeLabel]}>
             Edit
           </Text>
@@ -67,7 +87,7 @@ export function BottomNavigation({ activeTab, onTabChange, userRole }: BottomNav
         onPress={() => onTabChange('menu')}
         activeOpacity={0.7}
       >
-        <Icon name="menu" color={activeTab === 'menu' ? activeColor : inactiveColor} />
+        <MenuIcon color={activeTab === 'menu' ? activeColor : inactiveColor} />
         <Text style={[styles.label, activeTab === 'menu' && styles.activeLabel]}>
           Menu
         </Text>

@@ -1,3 +1,4 @@
+// Fake Login Screen - Role selection for Chef or Client
 import React from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
 } from 'react-native';
 
 type FakeLoginScreenProps = {
-  onLogin: (role: 'chef' | 'customer') => void;
+  onLogin: (role: 'chef' | 'client') => void;
 };
 
 export function FakeLoginScreen({ onLogin }: FakeLoginScreenProps) {
@@ -17,9 +18,9 @@ export function FakeLoginScreen({ onLogin }: FakeLoginScreenProps) {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.chefIcon}>👨‍🍳</Text>
+          <Text style={styles.icon}>👨‍🍳</Text>
           <Text style={styles.title}>Christoffel</Text>
-          <Text style={styles.subtitle}>Welcomes You!</Text>
+          <Text style={styles.subtitle}>Private Chef Menu</Text>
         </View>
 
         {/* Role Selection Buttons */}
@@ -33,13 +34,15 @@ export function FakeLoginScreen({ onLogin }: FakeLoginScreenProps) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.customerButton}
-            onPress={() => onLogin('customer')}
+            style={styles.clientButton}
+            onPress={() => onLogin('client')}
             activeOpacity={0.8}
           >
-            <Text style={styles.customerButtonText}>Customer</Text>
+            <Text style={styles.clientButtonText}>Client</Text>
           </TouchableOpacity>
         </View>
+
+        <Text style={styles.helpText}>Select your role to continue</Text>
       </View>
     </SafeAreaView>
   );
@@ -58,21 +61,21 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 60,
   },
-  chefIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+  icon: {
+    fontSize: 80,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: '#C9A961',
+    fontSize: 36,
+    fontWeight: '700',
+    color: 'rgba(152, 137, 50, 0.78)',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    color: '#5C4A3C',
+    color: '#333333',
   },
   buttonContainer: {
     width: '100%',
@@ -80,26 +83,37 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   chefButton: {
-    backgroundColor: '#8B9456',
-    paddingVertical: 16,
-    borderRadius: 8,
+    backgroundColor: 'rgba(152, 137, 50, 0.78)',
+    paddingVertical: 18,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   chefButtonText: {
     color: '#ffffff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  customerButton: {
-    backgroundColor: '#F5F5E8',
-    paddingVertical: 16,
-    borderRadius: 8,
+  clientButton: {
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
+    paddingVertical: 18,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(152, 137, 50, 0.3)',
   },
-  customerButtonText: {
-    color: '#5C4A3C',
+  clientButtonText: {
+    color: 'rgba(152, 137, 50, 0.78)',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  helpText: {
+    marginTop: 24,
+    fontSize: 14,
+    color: '#666666',
   },
 });
-// This is a fake login screen for selecting user roles (chef or customer).

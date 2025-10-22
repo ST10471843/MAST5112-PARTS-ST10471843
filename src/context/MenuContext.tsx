@@ -1,28 +1,31 @@
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { MenuItem, MenuContextType } from '../types';
 
-type MenuItem = {
-  id: string;
-  dishName: string;
-  description: string;
-  course: string;
+const MenuContext = createContext<MenuContextType | undefined>(undefined);
+
+type MenuProviderProps = {
+  children: ReactNode;
+  userRole: 'chef' | 'client' | null;
 };
 
-export default function MenuManager() {
+export function MenuProvider({ children, userRole }: MenuProviderProps) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  // Add new item
+  // Add menu item
   const addMenuItem = (item: Omit<MenuItem, 'id'>) => {
-    const newItem = { ...item, id: Date.now().toString() };
+    const newItem: MenuItem = {
+      ...item,
+      id: Date.now().toString(),
+    };
     setMenuItems([...menuItems, newItem]);
   };
 
-  // Delete item
+  // Delete menu item
   const deleteMenuItem = (id: string) => {
     setMenuItems(menuItems.filter(item => item.id !== id));
   };
 
-  // Edit item
+  // Edit menu item
   const editMenuItem = (id: string, updatedItem: Omit<MenuItem, 'id'>) => {
     setMenuItems(
       menuItems.map(item =>
@@ -31,51 +34,39 @@ export default function MenuManager() {
     );
   };
 
-  // Search
-  const searchMenuItems = () => {
-    const query = searchQuery.toLowerCase();
+  // Search menu items
+  const searchMenuItems = (query: string): MenuItem[] => {
+    const lowerQuery = query.toLowerCase();
     return menuItems.filter(
       item =>
-        item.dishName.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.course.toLowerCase().includes(query)
+        item.dishName.toLowerCase().includes(lowerQuery) ||
+        item.description.toLowerCase().includes(lowerQuery) ||
+        item.course.toLowerCase().includes(lowerQuery)
     );
   };
 
-  // Get by course
-  const getMenuItemsByCourse = (courseName: string) => {
+  // Get menu items by course
+  const getMenuItemsByCourse = (courseName: string): MenuItem[] => {
     return menuItems.filter(item => item.course === courseName);
   };
 
-  // Filtered results
-  const displayedItems = searchMenuItems();
+  const value: MenuContextType = {
+    menuItems,
+    addMenuItem,
+    deleteMenuItem,
+    editMenuItem,
+    searchMenuItems,
+    getMenuItemsByCourse,
+    userRole,
+  };
 
-  return (
-    <div style={{ padding: '20px' }}>
-      <h2>Menu Manager</h2>
+  return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;
+}
 
-      {/* Search input */}
-      <input
-        type="text"
-        placeholder="Search menu..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-
-      {/* Add Example Button */}
-      <button onClick={() => addMenuItem({ dishName: 'Pasta', description: 'Creamy Alfredo', course: 'Main' })}>
-        Add Example Dish
-      </button>
-
-      {/* List Items */}
-      <ul>
-        {displayedItems.map(item => (
-          <li key={item.id}>
-            <b>{item.dishName}</b> - {item.description} ({item.course})
-            <button onClick={() => deleteMenuItem(item.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+export function useMenu(): MenuContextType {
+  const context = useContext(MenuContext);
+  if (context === undefined) {
+    throw new Error('useMenu must be used within a MenuProvider');
+  }
+  return context;
 }

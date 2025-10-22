@@ -5,9 +5,9 @@ import { HomeScreen } from './src/screens/HomeScreen';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'chef' | 'customer' | null>(null);
+  const [userRole, setUserRole] = useState<'chef' | 'client' | null>(null);
 
-  const handleLogin = (role: 'chef' | 'customer') => {
+  const handleLogin = (role: 'chef' | 'client') => {
     setUserRole(role);
     setIsLoggedIn(true);
   };

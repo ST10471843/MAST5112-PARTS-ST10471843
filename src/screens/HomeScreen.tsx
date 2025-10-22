@@ -1,3 +1,4 @@
+// HomeScreen - Contains both Home section (top half) and Menu Management section (bottom half)
 import React, { useState } from 'react';
 import {
   View,
@@ -5,18 +6,22 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  FlatList,
   StyleSheet,
   SafeAreaView,
   Alert,
-  SectionList,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useMenu } from '../context/MenuContext';
 import { CourseList } from '../data/CourseList';
+import { MenuList } from '../components/MenuList';
+import { BottomNavigation } from '../components/BottomNavigation';
 
 type HomeScreenProps = {
   onLogout: () => void;
 };
+
+type NavigationTab = 'home' | 'edit' | 'menu';
 
 export function HomeScreen({ onLogout }: HomeScreenProps) {
   const {
@@ -28,6 +33,9 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     getMenuItemsByCourse,
     userRole,
   } = useMenu();
+
+  // Navigation state
+  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
 
   // Form state
   const [dishName, setDishName] = useState('');
@@ -44,7 +52,11 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     const courseItems = getMenuItemsByCourse(courseName);
     if (courseItems.length === 0) return 0;
 
-    const total = courseItems.reduce((sum, item) => sum + item.price, 0);
+    let total = 0;
+    // Use for loop as specified
+    for (let i = 0; i < courseItems.length; i++) {
+      total = total + courseItems[i].price;
+    }
     return total / courseItems.length;
   };
 
@@ -109,6 +121,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
       setSelectedCourse(item.course);
       setPrice(item.price.toString());
       setEditingId(id);
+      setActiveTab('edit');
     }
   };
 
@@ -133,127 +146,101 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
     );
   };
 
-  // Prepare section data for SectionList
-  const getSectionData = () => {
-    return CourseList.map((course) => ({
-      title: course.name,
-      data: getMenuItemsByCourse(course.name),
-    })).filter((section) => section.data.length > 0);
-  };
+  // Render course item for horizontal FlatList (not functional yet)
+  const renderCourseItem = ({ item }: { item: typeof CourseList[0] }) => (
+    <TouchableOpacity style={styles.courseChip} activeOpacity={0.7}>
+      <Text style={styles.courseChipText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
 
-  // Filter items based on search
-  const filteredItems = searchQuery
-    ? searchMenuItems(searchQuery)
-    : menuItems;
+  // Filter items for search
+  const filteredItems = searchQuery ? searchMenuItems(searchQuery) : menuItems;
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Chef Christoffel's Menu</Text>
+        <Text style={styles.headerTitle}>Christoffel's Menu</Text>
         <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        {/* Top Half: Home Content - Prepared Menu */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Prepared Menu</Text>
-
-          {/* Course Price Summary */}
-          <View style={styles.courseSummary}>
-            <View style={styles.courseSummaryItem}>
-              <Text style={styles.courseSummaryLabel}>Any price of</Text>
-              <Text style={styles.courseSummaryText}>Dessert</Text>
-              <Text style={styles.courseSummaryPrice}>
-                (R{getAveragePriceByCourse('Desserts').toFixed(0)})
-              </Text>
-            </View>
-            <View style={styles.courseSummaryItem}>
-              <Text style={styles.courseSummaryLabel}>Any price of</Text>
-              <Text style={styles.courseSummaryText}>Appetizer</Text>
-              <Text style={styles.courseSummaryPrice}>
-                (R{getAveragePriceByCourse('Starters').toFixed(0)})
-              </Text>
-            </View>
-            <View style={styles.courseSummaryItem}>
-              <Text style={styles.courseSummaryLabel}>Any price of</Text>
-              <Text style={styles.courseSummaryText}>Main</Text>
-              <Text style={styles.courseSummaryPrice}>
-                (R{getAveragePriceByCourse('Mains').toFixed(0)})
-              </Text>
-            </View>
-          </View>
-
-          <Text style={styles.menuTitle}>3 Course Menu</Text>
-
-          {/* Menu Display - SectionList organized by courses */}
-          {menuItems.length > 0 ? (
-            <View>
-              <SectionList
-                sections={getSectionData()}
-                scrollEnabled={false}
-                keyExtractor={(item) => item.id}
-                renderSectionHeader={({ section: { title } }) => (
-                  <Text style={styles.courseTitle}>{title}</Text>
-                )}
-                renderItem={({ item }) => (
-                  <View style={styles.menuItem}>
-                    <View style={styles.menuItemContent}>
-                      <Text style={styles.menuItemName}>{item.dishName}</Text>
-                      <Text style={styles.menuItemDescription}>
-                        {item.description}
-                      </Text>
-                      <Text style={styles.menuItemPrice}>
-                        R{item.price.toFixed(2)}
-                      </Text>
-                    </View>
-                    {userRole === 'chef' && (
-                      <View style={styles.menuItemActions}>
-                        <TouchableOpacity
-                          style={styles.editButton}
-                          onPress={() => handleEdit(item.id)}
-                        >
-                          <Text style={styles.editButtonText}>Edit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleDelete(item.id)}
-                        >
-                          <Text style={styles.deleteButtonText}>Delete</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Total Items Count with underlined text */}
-              <View style={styles.totalContainer}>
-                <Text style={styles.totalText}>
-                  Total Items: {menuItems.length}
+      {/* Main Content with ScrollView */}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* HOME TAB - Top Half: Prepared Menu View */}
+        {activeTab === 'home' && (
+          <View style={styles.homeSection}>
+            {/* Course Price Summary */}
+            <View style={styles.summaryContainer}>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Avg price of</Text>
+                <Text style={styles.summaryText}>Dessert</Text>
+                <Text style={styles.summaryPrice}>
+                  (R{getAveragePriceByCourse('Desserts').toFixed(0)})
+                </Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Avg price of</Text>
+                <Text style={styles.summaryText}>Starter</Text>
+                <Text style={styles.summaryPrice}>
+                  (R{getAveragePriceByCourse('Starters').toFixed(0)})
+                </Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Avg price of</Text>
+                <Text style={styles.summaryText}>Main</Text>
+                <Text style={styles.summaryPrice}>
+                  (R{getAveragePriceByCourse('Mains').toFixed(0)})
                 </Text>
               </View>
             </View>
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
-                No menu items yet.{' '}
-                {userRole === 'chef'
-                  ? 'Add your first item below!'
-                  : 'Please check back later.'}
-              </Text>
-            </View>
-          )}
-        </View>
 
-        {/* Bottom Half: Menu Management - Only for Chef */}
-        {userRole === 'chef' && (
-          <View style={styles.section}>
+            {/* Horizontal Course List (not functional yet) */}
+            <FlatList
+              data={CourseList}
+              renderItem={renderCourseItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.courseList}
+            />
+
+            <Text style={styles.menuTitle}>Prepared Menu</Text>
+
+            {/* Menu Display - SectionList via MenuList component */}
+            {menuItems.length > 0 ? (
+              <>
+                <MenuList
+                  onEdit={userRole === 'chef' ? handleEdit : undefined}
+                  onDelete={userRole === 'chef' ? handleDelete : undefined}
+                />
+
+                {/* Total Items Count with underline effect */}
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalText}>Total Items: {menuItems.length}</Text>
+                  <View style={styles.underline} />
+                </View>
+              </>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  No menu items yet.{' '}
+                  {userRole === 'chef'
+                    ? 'Switch to Edit tab to add items!'
+                    : 'Please check back later.'}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* EDIT TAB - Bottom Half: Menu Management (Chef only) */}
+        {activeTab === 'edit' && userRole === 'chef' && (
+          <View style={styles.managementSection}>
             <Text style={styles.sectionTitle}>Menu Management</Text>
 
-            {/* Dish Name Input */}
+            {/* Title Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Dish Name</Text>
               <TextInput
@@ -261,6 +248,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                 placeholder="Enter dish name"
                 value={dishName}
                 onChangeText={setDishName}
+                placeholderTextColor="#999999"
               />
             </View>
 
@@ -274,6 +262,8 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                 onChangeText={setDescription}
                 multiline
                 numberOfLines={4}
+                textAlignVertical="top"
+                placeholderTextColor="#999999"
               />
             </View>
 
@@ -307,6 +297,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                 value={price}
                 onChangeText={setPrice}
                 keyboardType="numeric"
+                placeholderTextColor="#999999"
               />
             </View>
 
@@ -315,6 +306,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               <TouchableOpacity
                 style={[styles.button, styles.saveButton]}
                 onPress={handleSave}
+                activeOpacity={0.8}
               >
                 <Text style={styles.saveButtonText}>
                   {editingId ? 'Update' : 'Save'}
@@ -324,6 +316,7 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
               <TouchableOpacity
                 style={[styles.button, styles.clearButton]}
                 onPress={handleClear}
+                activeOpacity={0.8}
               >
                 <Text style={styles.clearButtonText}>Clear</Text>
               </TouchableOpacity>
@@ -334,41 +327,61 @@ export function HomeScreen({ onLogout }: HomeScreenProps) {
                 Editing menu item - Click Update to save changes
               </Text>
             )}
+          </View>
+        )}
 
-            {/* Search Functionality */}
-            <View style={styles.searchSection}>
-              <Text style={styles.label}>Search Menu</Text>
+        {/* MENU TAB - Search and Browse */}
+        {activeTab === 'menu' && (
+          <View style={styles.menuSection}>
+            <Text style={styles.sectionTitle}>Browse Menu</Text>
+
+            {/* Search Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Search</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Search by name or description..."
+                placeholder="Search menu items..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
+                placeholderTextColor="#999999"
               />
-
-              {searchQuery !== '' && (
-                <View style={styles.searchResults}>
-                  <Text style={styles.searchResultsTitle}>
-                    Search Results ({filteredItems.length})
-                  </Text>
-                  {filteredItems.map((item) => (
-                    <View key={item.id} style={styles.searchResultItem}>
-                      <Text style={styles.searchResultName}>
-                        {item.dishName}
-                      </Text>
-                      <Text style={styles.searchResultCourse}>
-                        {item.course}
-                      </Text>
-                      <Text style={styles.searchResultPrice}>
-                        R{item.price.toFixed(2)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
             </View>
+
+            {/* Search Results */}
+            {searchQuery !== '' && (
+              <View style={styles.searchResults}>
+                <Text style={styles.searchResultsTitle}>
+                  Results ({filteredItems.length})
+                </Text>
+                {filteredItems.map((item) => (
+                  <View key={item.id} style={styles.searchResultItem}>
+                    <Text style={styles.searchResultName}>{item.dishName}</Text>
+                    <Text style={styles.searchResultCourse}>{item.course}</Text>
+                    <Text style={styles.searchResultPrice}>
+                      R{item.price.toFixed(2)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Full Menu Display */}
+            {searchQuery === '' && (
+              <>
+                <Text style={styles.menuTitle}>Full Menu</Text>
+                <MenuList />
+              </>
+            )}
           </View>
         )}
       </ScrollView>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        userRole={userRole}
+      />
     </SafeAreaView>
   );
 }
@@ -383,21 +396,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#D4D1C4',
+    borderBottomColor: '#E0E0E0',
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#C9A961',
+    fontWeight: '700',
+    color: 'rgba(152, 137, 50, 0.78)',
   },
   logoutButton: {
-    backgroundColor: '#8B9456',
+    backgroundColor: 'rgba(152, 137, 50, 0.78)',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   logoutButtonText: {
     color: '#ffffff',
@@ -406,121 +419,78 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  section: {
+  scrollContent: {
+    paddingBottom: 90,
+  },
+  homeSection: {
     padding: 16,
-    backgroundColor: '#ffffff',
-    marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#5C4A3C',
-    marginBottom: 16,
-  },
-  courseSummary: {
+  summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
     gap: 8,
   },
-  courseSummaryItem: {
+  summaryItem: {
     flex: 1,
-    backgroundColor: '#F5F5E8',
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  courseSummaryLabel: {
+  summaryLabel: {
+    fontSize: 10,
+    color: '#666666',
+    marginBottom: 4,
+  },
+  summaryText: {
     fontSize: 12,
-    color: '#8B8167',
+    fontWeight: '600',
+    color: '#000000',
     marginBottom: 4,
   },
-  courseSummaryText: {
-    fontSize: 14,
-    color: '#5C4A3C',
-    marginBottom: 4,
+  summaryPrice: {
+    fontSize: 11,
+    color: '#666666',
   },
-  courseSummaryPrice: {
-    fontSize: 12,
-    color: '#8B8167',
-  },
-  menuTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#5C4A3C',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  courseTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#5C4A3C',
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  menuItem: {
-    backgroundColor: '#F5F5E8',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  menuItemContent: {
-    marginBottom: 8,
-  },
-  menuItemName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#5C4A3C',
-    marginBottom: 4,
-  },
-  menuItemDescription: {
-    fontSize: 14,
-    color: '#8B8167',
-    marginBottom: 8,
-  },
-  menuItemPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B9456',
-  },
-  menuItemActions: {
-    flexDirection: 'row',
+  courseList: {
+    paddingVertical: 8,
     gap: 8,
   },
-  editButton: {
-    flex: 1,
-    backgroundColor: '#8B9456',
+  courseChip: {
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 6,
-    alignItems: 'center',
+    borderRadius: 20,
+    marginRight: 8,
   },
-  editButtonText: {
-    color: '#ffffff',
+  courseChipText: {
+    color: 'rgba(152, 137, 50, 0.78)',
     fontWeight: '600',
+    fontSize: 14,
   },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: '#d4183d',
-    paddingVertical: 8,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
+  menuTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000000',
+    textAlign: 'center',
+    marginVertical: 16,
   },
   totalContainer: {
     marginTop: 16,
     paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#D4D1C4',
     alignItems: 'center',
   },
   totalText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5C4A3C',
-    textDecorationLine: 'underline',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  underline: {
+    width: 150,
+    height: 1,
+    backgroundColor: '#000000',
   },
   emptyContainer: {
     paddingVertical: 40,
@@ -528,8 +498,20 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#8B8167',
+    color: '#666666',
     textAlign: 'center',
+  },
+  managementSection: {
+    padding: 16,
+  },
+  menuSection: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000000',
+    marginBottom: 20,
   },
   inputGroup: {
     marginBottom: 16,
@@ -537,28 +519,28 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5C4A3C',
+    color: '#000000',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#F5F5E8',
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
     borderWidth: 1,
-    borderColor: '#D4D1C4',
-    borderRadius: 6,
+    borderColor: 'rgba(152, 137, 50, 0.3)',
+    borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     fontSize: 16,
-    color: '#5C4A3C',
+    color: '#000000',
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   pickerContainer: {
-    backgroundColor: '#F5F5E8',
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
     borderWidth: 1,
-    borderColor: '#D4D1C4',
-    borderRadius: 6,
+    borderColor: 'rgba(152, 137, 50, 0.3)',
+    borderRadius: 8,
     overflow: 'hidden',
   },
   picker: {
@@ -572,33 +554,33 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 6,
+    borderRadius: 8,
     alignItems: 'center',
   },
   saveButton: {
-    backgroundColor: '#8B9456',
+    backgroundColor: 'rgba(152, 137, 50, 0.78)',
   },
   saveButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   clearButton: {
-    backgroundColor: '#F5F5E8',
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
+    borderWidth: 1,
+    borderColor: 'rgba(152, 137, 50, 0.3)',
   },
   clearButtonText: {
-    color: '#5C4A3C',
+    color: 'rgba(152, 137, 50, 0.78)',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   editingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#8B9456',
+    color: 'rgba(152, 137, 50, 0.78)',
     textAlign: 'center',
-  },
-  searchSection: {
-    marginTop: 24,
+    fontWeight: '600',
   },
   searchResults: {
     marginTop: 12,
@@ -606,28 +588,28 @@ const styles = StyleSheet.create({
   searchResultsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5C4A3C',
+    color: '#000000',
     marginBottom: 8,
   },
   searchResultItem: {
-    backgroundColor: '#F5F5E8',
+    backgroundColor: 'rgba(152, 137, 50, 0.19)',
     padding: 12,
-    borderRadius: 6,
+    borderRadius: 8,
     marginBottom: 8,
   },
   searchResultName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5C4A3C',
+    color: '#000000',
   },
   searchResultCourse: {
     fontSize: 14,
-    color: '#8B8167',
+    color: '#666666',
     marginTop: 4,
   },
   searchResultPrice: {
     fontSize: 14,
-    color: '#8B9456',
+    color: 'rgba(152, 137, 50, 0.78)',
     marginTop: 4,
   },
 });

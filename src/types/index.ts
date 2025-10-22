@@ -1,3 +1,4 @@
+
 export type Course = {
   id: string;
   name: string;
@@ -18,5 +19,5 @@ export type MenuContextType = {
   editMenuItem: (id: string, item: Omit<MenuItem, 'id'>) => void;
   searchMenuItems: (query: string) => MenuItem[];
   getMenuItemsByCourse: (courseName: string) => MenuItem[];
-  userRole: 'chef' | 'customer' | null;
+  userRole: 'chef' | 'client' | null;
 };
