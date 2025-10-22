@@ -1,11 +1,11 @@
-// MenuList component - displays menu items organized by course in a SectionList
-import React from 'react'; 
+import React from 'react';
 import {
   View,
   Text,
   SectionList,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { useMenu } from '../context/MenuContext';
 import { CourseList } from '../data/CourseList';
@@ -18,7 +18,6 @@ type MenuListProps = {
 export function MenuList({ onEdit, onDelete }: MenuListProps) {
   const { getMenuItemsByCourse, userRole } = useMenu();
 
-  // Prepare section data for SectionList
   const getSectionData = () => {
     const sections = [];
 
@@ -38,23 +37,34 @@ export function MenuList({ onEdit, onDelete }: MenuListProps) {
   };
 
   return (
-    // Inside MenuList, wherever you render the FlatList or SectionList
     <SectionList
       sections={getSectionData()}
-      nestedScrollEnabled  // <--- add this here
       keyExtractor={(item) => item.id}
       renderSectionHeader={({ section: { title } }) => (
         <Text style={styles.sectionHeader}>{title}</Text>
       )}
       renderItem={({ item }) => (
         <View style={styles.menuItem}>
+          {item.image ? (
+            <Image
+              source={{ uri: item.image }}
+              style={styles.dishImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Text style={styles.placeholderText}>No Image</Text>
+            </View>
+          )}
+
           <View style={styles.menuItemContent}>
             <Text style={styles.dishName}>{item.dishName}</Text>
             <Text style={styles.description}>{item.description}</Text>
             <Text style={styles.price}>R{item.price.toFixed(2)}</Text>
           </View>
 
-          {userRole === 'chef' && (onEdit || onDelete) && (
+          {/* ✅ Action buttons visible for Chef */}
+          {userRole === 'chef' && (
             <View style={styles.actions}>
               {onEdit && (
                 <TouchableOpacity
@@ -104,6 +114,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
   },
+  dishImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 8,
+    backgroundColor: '#EAEAEA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  placeholderText: {
+    color: '#999999',
+  },
   menuItemContent: {
     marginBottom: 8,
   },
@@ -126,6 +154,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 8,
   },
   editButton: {
     flex: 1,

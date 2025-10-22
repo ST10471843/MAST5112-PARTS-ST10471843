@@ -1,4 +1,3 @@
-
 export type Course = {
   id: string;
   name: string;
@@ -10,6 +9,7 @@ export type MenuItem = {
   description: string;
   course: string;
   price: number;
+  image?: string; 
 };
 
 export type MenuContextType = {
@@ -21,3 +21,4 @@ export type MenuContextType = {
   getMenuItemsByCourse: (courseName: string) => MenuItem[];
   userRole: 'chef' | 'client' | null;
 };
+
