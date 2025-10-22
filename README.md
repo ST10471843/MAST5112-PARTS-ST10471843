@@ -72,7 +72,7 @@ Custom bottom navigation bar with three tabs:
 
 ---
 
-## 🧩 Navigation & Flow
+##  Navigation & Flow
 
 ### User Flow
 
@@ -94,7 +94,7 @@ Menu Tab: Search and browse
 
 ---
 
-## 🔧 Technologies & Dependencies
+## Technologies & Dependencies
 
 ### Core
 - React Native
@@ -146,7 +146,7 @@ Menu Tab: Search and browse
 
 ---
 
-## 🎥 Video Demonstration
+## Video Demonstration
 
 **YouTube Link:** https://youtu.be/kVaI92xWjaM?si=jfEZWWJ-8Wug8PCr or incase it doesnt open: https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fyoutu.be%2FkVaI92xWjaM%3Fsi%3D-fSIdnNRNQhiMs80&data=05%7C02%7CST10471843%40vcconnect.edu.za%7C49f112239a364400dfc308de11a4bf4e%7Ce10c8f44f469448fbc0dd781288ff01b%7C0%7C0%7C638967596473910659%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=OlWJ9K32YEveen2cX8eXHifwlV%2Bkq1Meo0TdYpycrtU%3D&reserved=0 
 
@@ -215,7 +215,7 @@ Menu Tab: Search and browse
 
 ---
 
-## 🧠 Challenges, Learnings & Reflections
+## Challenges, Learnings & Reflections
 
 ### Challenges Faced
 
@@ -276,7 +276,7 @@ Menu Tab: Search and browse
 
 ---
 
-## 📚 References
+## References
 
 -Expo Software Inc., 2025. Expo . Available at: https://expo.dev
  (Accessed on: 20 October 2025).
