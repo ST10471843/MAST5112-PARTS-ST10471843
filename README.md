@@ -25,7 +25,7 @@ This is a mobile application developed for Christoffel, a private chef who provi
 ### Purpose
 Christoffel needs a flexible digital menu management system because every night can bring a different dining experience. This app streamlines menu operations and enables him to deliver exceptional culinary experiences tailored to each client's preferences.
 
-### Key Features (Part 2)
+### Key Features 
 
  #### Menu Management (Chef)
 - Add new menu items with dish name, description, course, and price
@@ -137,7 +137,7 @@ Menu Tab: Search and browse
 
 ---
 
-## 📷 Screenshots
+## Screenshots
 
 1. **Login Screen**:
 2. **Home Tab - Prepared Menu**:
